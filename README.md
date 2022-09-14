@@ -1,5 +1,5 @@
-# C++ Class Note
-Class Address: [《程序设计与算法（三）C++面向对象程序设计 北京大学 郭炜》](https://www.bilibili.com/video/BV1ob411q7vb?vd_source=1ac585a111fc39c9f7b30de84186453f)
+# C++ 程序设计与算法 笔记
+课程地址: [《程序设计与算法（三）C++面向对象程序设计 北京大学 郭炜》](https://www.bilibili.com/video/BV1ob411q7vb?vd_source=1ac585a111fc39c9f7b30de84186453f)
 
 ## 0. 引用
 
