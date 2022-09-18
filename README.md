@@ -475,3 +475,58 @@ int main()
 }
 ```
 
+### 9. 运算符重载
+运算符重载的实质是函数重载，其目的是用于扩充自定义类型数据的相关操作，例如不同自定义类型相加减等；
+```
+返回值类型 operator 运算符(形参表)
+{
+    ......
+}
+```
+重载函数为成员函数时，参数个数为运算符目数减一；
+重载函数为普通函数时，参数个数为运算符目数；
+```
+class Complex
+{
+    public:
+	    double real, imag;
+		Complex(double r=0.0, double i=0.0): real(r), imag(i) {    }
+		Complex operator-(const Complex & c);
+};
+
+// 全局函数，非 Complex 对象的成员函数
+Complex operator+(const Complex & a, const Complex & b)
+{
+	return Complex(a.real + b.real, a.imag + b.imag);
+}
+
+// Complex 对象的成员函数
+Complex Complex::operator-(const Complex & c)
+{
+	return Complex(real - c.real, imag - c.imag);
+}
+```
+Note: 经测试发现对于同一种运算操作，全局函数好像会覆盖类成员函数，例：
+```
+Complex Complex::operator+(const Complex & c)
+{
+	return Complex(real + 2*c.operator_real, imag + 2*c.operator_imag);
+}
+
+Complex operator+(const Complex & a, const Complex & b)
+{
+	return Complex(a.operator_real + b.operator_real, a.operator_imag + b.operator_imag);
+}
+
+int main()
+{
+    Complex a(3,3), b(2,2);
+    Complex c = a.operator+(b);
+    cout << c.operator_real << "\n" << c.operator_imag << endl;
+    Complex d = a + b;
+    cout << d.operator_real << "\n" << d.operator_imag << endl;
+    return 0;
+}
+
+# 结果均为 (7, 7)
+```
