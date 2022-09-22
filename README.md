@@ -310,7 +310,7 @@ String::~String(){
 
 
 
-### 5. this 指针
+## 5. this 指针
 
 应用于 C++ 翻译到 C 程序的指针变量，用于指向 C++ 的成员函数作用的对象；
 
@@ -355,9 +355,8 @@ int main(){
 
 静态成员函数的真实参数的个数，就是程序中写出来的参数；
 
-##### 
 
-### 6. 静态成员
+## 6. 静态成员
 
 静态成员指在说明前面加了 static 关键字的成员；静态成员变量为所有对象共享；sizeof运算符不会计算静态成员变量；
 
@@ -394,7 +393,7 @@ class CRectangle{
 
 
 
-### 7. 成员对象和封闭类：
+## 7. 成员对象和封闭类：
 
 **有成员对象的类叫封闭（enclosing）类**
 
@@ -439,7 +438,7 @@ int main()
 
 
 
-### 8. 常量对象
+## 8. 常量对象
 
 如果不希望某个对象的值被改变，则定义该对象的时候可以加上 const 关键字;
 
@@ -475,7 +474,9 @@ int main()
 }
 ```
 
-### 9. 运算符重载
+## 9. 运算符重载
+
+### 9.1 运算符重载实现
 运算符重载的实质是函数重载，其目的是用于扩充自定义类型数据的相关操作，例如不同自定义类型相加减等；
 ```
 返回值类型 operator 运算符(形参表)
@@ -529,4 +530,92 @@ int main()
 }
 
 # 结果均为 (7, 7)
+```
+### 9.2 赋值运算符重载
+目的：希望赋值运算符两边的类型可以不匹配，通过赋值运算符将其赋值给对象；** **赋值运算符只能重载为成员函数** **
+```
+class String {
+    private:
+        char * str;
+    public:
+        String ():str(new char[1]) { str[0] = 0;}
+        const char * c_str() { return str;};
+        String & operator=(const char *s);
+        ~String();
+};
+
+String & String::operator=(const char * s)
+{
+    delete [] str;
+    str = new char[strlen(s) + 1];
+    strcpy(str, s);
+    return * this;
+}
+
+String::~String() {
+    delete [] str;
+}
+```
+其中，运算符重载可以看成是一个新的函数```class.operator=()```,可以等同于一般的函数进行操作
+```
+int main() {
+	String s;
+	s = "Good luck,";        // 等价于 s.operator=("Good luck,");
+	String s2 = "hello!";    // 函数报错：这里的“=”不是赋值语句，而是初始化语句
+	return 0;
+}
+```
+
+### 9.3 浅拷贝和深拷贝
+```
+String S1, S2;
+S1 = "this";
+S2 = "that";
+S1 = S2;
+```
+如果不定义赋值运算符，会导致```S1 = S2```使得 ```S1.str```和```S2.str```指向同一地方；
+- ```S1.str```所指向的地址无法访问，成为内存垃圾；
+- ```S1.str```执行析构函数释放空间后，```S2.str```还会释放一次空间，造成错误；
+- 针对```S1 = "other"```后，会导致 ```S2.str```指向的地方被 ```delete```;
+
+因此需要对运算符重载，为```class.operator=```添加重载操作；
+```
+String & String::operator=(const String & s)
+{
+	if(this == & s) {
+		return * this;	// 判断当前引用是否为对象本身；
+	}
+    delete [] str;
+    str = new char[strlen(s) + 1];		// C语言中 char* 最后以 "\0" 结尾；
+    strcpy(str, s);
+    return * this;
+}
+```
+```"class.operator="```返回值类型：尽量保持运算符原本的特性；
+
+ ```
+a = b = c
+等价于：a.operator=(b.operator=(c));
+(a = b) = c
+等价于：(a.operator=(b)).operator=(c);
+```
+
+### 9.4 运算符重载为友元函数
+一般情况下，将运算符重载为类的成员；
+但有时候重载为成员函数不能满足使用需求，重载为普通函数又不能访问类的私有成员，所以需要重载运算符为友元；
+```
+// 全局函数写法
+Complex operator+(double r, const Complex & c) {
+	return Complex(c.real + r, c.imag);
+}
+
+//类成员函数写法
+Complex Complex::operator+(double r) {
+	return Complex(real+r, imag);
+}
+
+这样就能实现:
+c = c + 5
+c = 5 + c
+两个操作同时满足全局函数写法的实现；
 ```
