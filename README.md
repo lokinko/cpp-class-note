@@ -474,7 +474,7 @@ int main()
 }
 ```
 
-### 9. 运算符重载
+## 9. 运算符重载
 运算符重载的实质是函数重载，其目的是用于扩充自定义类型数据的相关操作，例如不同自定义类型相加减等；
 ```
 返回值类型 operator 运算符(形参表)
@@ -617,3 +617,87 @@ Complex Complex::operator+(double r) {
 c = c + 5
 c = 5 + c
 两个操作同时满足全局函数写法的实现；
+```
+
+## 10. 可变长数组类的实现
+很多场景下需要对class中数据存放的长度实现可变输入，包括添加元素，赋值，指定某index的值等，通过运算符重载和复制构造函数等方式可以实现这些功能；
+**可以通过模板类```<template>```的方式实现数据类型的扩展；**
+```
+class CArray {
+public:
+	// 构造函数
+	CArray(int s=0);
+	// 复制构造函数
+	CArray(CArray &a);
+	// 析构函数
+	~CArray();
+	int length() { return size;};
+	// 返回引用才能在赋值过程 a[i] = 4 生效
+	int& operator[](int i) { return ptr[i];};
+	void operator=(const CArray &a);
+	void push_back(int v);
+private:
+	int size;
+	int *ptr;
+}
+
+CArray::CArray(int s):size(s) {
+	if(s == 0) {
+		ptr = NULL;
+	}
+	else{
+		ptr = new int[s];
+	}
+}
+
+CArray::CArray(CArray &a) {
+	if(!a.ptr) {
+		ptr = NULL;
+		size = 0;
+		return;
+	}
+	ptr = new int[a.size];
+	memcpy(ptr, a.ptr, sizeof(int)*a.size);
+	size = a.size;
+}
+
+CArray::~CArray() {
+	if(ptr) {delete [] ptr;}
+}
+
+CArray & CArray::operator=(const CArray &a) {
+	if(ptr == a.ptr) {
+		return *this;
+	}
+	if(a.ptr == NULL) {
+		if(ptr) {
+			delete [] ptr;
+		}
+		ptr = NULL;
+		size = 0;
+		return *this;
+	}
+	if(size < a.size) {
+		if(ptr) {
+			delete [] ptr;
+		}
+		ptr = new int[a.size];
+	}
+	memcpy(ptr, a.ptr, sizeof(int)*a.size);
+	size = a.size;
+	return *this
+}
+
+void CArray::push_back(int v) {
+	if(ptr) {
+		int * tmpPtr = new int[size+1];
+		memcpy(tmpPtr, ptr, sizeof(int)*size);
+		delete [] ptr;
+		ptr = tmpPtr;
+	}
+	else {
+		ptr = new int[1];
+	ptr[size++] = v;
+	}
+}
+```
