@@ -701,3 +701,44 @@ void CArray::push_back(int v) {
 	}
 }
 ```
+
+## 11. 流插入运算符与流提取运算符的重载
+```cout << "hello" << 5 << endl;``` 中的 ```<<```运算符支持流式数据，是因为 ```cout```是经由 ostream 类的对象，支持了重载```<<```运算符的功能；
+
+**如何支持多次```<<```操作？**
+
+ ```
+// 通过控制重载后返回值为 ostream 类即可连续操作
+ostream & ostream::operator<<(int n)
+{
+	...... // 输出 n
+	return *this;
+}
+
+ostream & ostream::operator<<(const char *s)
+{
+	...... // 输出 s
+	return *this;
+}
+
+// 支持自定义类型的输出
+ostream & operato<<(ostream &o, const CStudent & s)
+{
+	o << s.nAge;
+	return o;
+	
+}
+
+// 支持自定义类型的输入
+istream & operator>>(istream & is, Complex & c)
+{
+	string s;
+	is >> s;
+	int pos = s.find("+", 0);
+	string sTmp = s.substr(0, pos);
+	creal = atof(sTmp.c_str());
+	sTmp = s.subset(pos+1, s.length()-pos-2);
+	c.imag = atof(sTmp.c_str());
+	return is;
+}}
+```
